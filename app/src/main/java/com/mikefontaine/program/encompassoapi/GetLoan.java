@@ -6,6 +6,9 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.JsonReader;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -50,6 +53,7 @@ public class GetLoan extends AppCompatActivity {
 
         // populate UI
         userBox.setText(user);
+
         passBox.setText(pass);
         instanceBox.setText(instance);
         tokenBox.setText(token);
@@ -108,6 +112,8 @@ public class GetLoan extends AppCompatActivity {
                               //  Results.setText(myConnection.getResponseCode());
                             }
 
+                            myConnection.disconnect();
+
 
 
                         } catch (MalformedURLException e) {
@@ -129,6 +135,40 @@ public class GetLoan extends AppCompatActivity {
         });
 
 
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        //handle item selection
+        switch (item.getItemId()){
+            case R.id.menu_exit:
+                System.exit(0);
+                return true;
+            case R.id.menu_clear:
+                EditText userBox = findViewById(R.id.editUserName);
+                EditText passBox= findViewById(R.id.editPassword);
+                EditText instanceBox = findViewById(R.id.editInstanceID);
+                EditText tokenBox = findViewById(R.id.editToken);
+                userBox.setText("");
+                passBox.setText("");
+                instanceBox.setText("");
+                tokenBox.setText("");
+                editor.putString("password", "");
+                editor.putString("username", "");
+                editor.putString("instance", "");
+                editor.commit();
+
+                return true;
+            default:
+                return true;
+
+
+        }
     }
 
 
