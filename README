@@ -1,2 +1,5 @@
-My Project
-testing testing
+Welcome to my workking project 
+
+make sure to add you client secret and client ID in the strings.xml resource
+<string name = "clientid">**yourCID**</string>
+<string name = "clientsecret">**YourClientSecret**</string>
