@@ -6,6 +6,8 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 //import android.util.JsonReader;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -28,12 +30,19 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
 public class GetLoan extends AppCompatActivity {
     static SharedPreferences settings;
     static SharedPreferences.Editor editor;
+    private RecyclerView GuidListViewer;
+    private RecyclerView.LayoutManager loanLayoutManager;
+    private ArrayList<String> loanList;
+    //private List<String> test;
+    private LoanAdapter adapter;
 
 
     @Override
@@ -45,6 +54,8 @@ public class GetLoan extends AppCompatActivity {
         EditText passBox= findViewById(R.id.editPassword);
         EditText instanceBox = findViewById(R.id.editInstanceID);
         EditText tokenBox = findViewById(R.id.editToken);
+        GuidListViewer = findViewById(R.id.guidList);
+        loanLayoutManager = new LinearLayoutManager(this);
         //init input variables and check for stored values
         settings = this.getPreferences(MODE_PRIVATE);
         editor = settings.edit();
@@ -52,17 +63,18 @@ public class GetLoan extends AppCompatActivity {
         String pass = settings.getString("password", "test");
         String instance = settings.getString("instance", "test");
         String token = "test";
+        loanList = new ArrayList<>();
+        adapter = new LoanAdapter(loanList);
         // set constants
-        //final String CLIENT_SECRET = getString(R.string.clientsecret);
-        //final String CLIENT_ID = getString(R.string.clientid);
         //create view
-
         // populate UI
         userBox.setText(user);
-
         passBox.setText(pass);
         instanceBox.setText(instance);
         tokenBox.setText(token);
+        GuidListViewer.setLayoutManager(loanLayoutManager);
+        GuidListViewer.setHasFixedSize(true);
+        GuidListViewer.setAdapter(adapter);
         // create button listener
         final Button getTokenButton = findViewById(R.id.button_getToken);
         getTokenButton.setOnClickListener(new View.OnClickListener(){
@@ -87,7 +99,14 @@ public class GetLoan extends AppCompatActivity {
         getLoanButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
+                loanList.clear();
                 getLoans();
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                adapter.notifyDataSetChanged();
             }
         });
 
@@ -200,15 +219,10 @@ public class GetLoan extends AppCompatActivity {
     public void getLoans(){
         final TextView token = findViewById(R.id.editToken);
         final TextView loanNumber = findViewById(R.id.editLoanNum);
-        //final ListView guidListView = findViewById(R.id.GUIDList);
-        //final ArrayAdapter guidAdapter;
-        //final ArrayList<String> guidList = new ArrayList<>();
         final String tok = token.getText().toString();
         final String loan = loanNumber.getText().toString();
         final TextView results = findViewById(R.id.editResults);
-
         // send post to retrieve loan to server
-
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
@@ -226,9 +240,7 @@ public class GetLoan extends AppCompatActivity {
                     myConnection.getOutputStream().write(body.getBytes());
                     String body_and_properties = body+"                      "+ requestProperties;
                     results.setText(body_and_properties);
-
                     if (myConnection.getResponseCode() == 200) {
-
                         InputStream responseBody = myConnection.getInputStream();
                         BufferedReader reader = new BufferedReader( new InputStreamReader(responseBody, "UTF-8"), 8);
                         StringBuilder sb = new StringBuilder();
@@ -245,21 +257,23 @@ public class GetLoan extends AppCompatActivity {
                             e.printStackTrace();
                         }
                         if (jObject.length()>0) {
-                            JSONObject GUIDObject = jObject.getJSONObject(0);
-                            if (GUIDObject != null) {
-                                String GUID = GUIDObject.optString("loanGuid");
-                                if (GUID != null) {
-                                    results.setText(GUID);
+                            for(int x = 0; x<jObject.length(); x++){
+                                JSONObject GUIDObject = jObject.getJSONObject(x);
+                                if (GUIDObject != null) {
+                                    String GUID = GUIDObject.optString("loanGuid");
+                                    if (GUID != null) {
+                                        results.setText(GUID);
+                                        loanList.add(GUID);
+                                    } else {
+                                        results.setText("Problem reading JSON");
+                                    }
                                 } else {
-                                    results.setText("Problem reading JSON");
+                                    results.setText("No Loan Found for " + loan);
                                 }
-                            } else {
-                                results.setText("No Loan Found for " + loan);
                             }
                         }else {
                             results.setText("No Loan Found");
                         }
-
                     } else {
                         String current_results = results.getText().toString();
                         String new_results = current_results
@@ -272,9 +286,6 @@ public class GetLoan extends AppCompatActivity {
                     }
                     myConnection.disconnect();
 
-
-
-
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
@@ -285,13 +296,7 @@ public class GetLoan extends AppCompatActivity {
 
             }
         });
-       // guidList.add(call[0].toString());
-        //guidList.add(call[1].toString());
-        //guidList.add("test");
-       // guidAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, guidList);
-        //guidListView.setAdapter(guidAdapter);
-
-
+       // loanList.add("something");
     }
 
 
