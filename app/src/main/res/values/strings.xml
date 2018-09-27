@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">EncompassOAPI</string>
-    <string name = "clientid">rpu8kdi3</string>
-    <string name = "clientsecret">N2KzVZHZKScCjJ3qQGjhh9fnnFLdpORuaNSoJvRSnpC7NxNKEORpioJw3yXHwWy6</string>
+    <string name = "clientid"></string>
+    <string name = "clientsecret"></string>
     <string name = "username"> </string>
     <string name = "instanceid"> </string>
 </resources>
